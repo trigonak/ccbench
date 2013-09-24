@@ -76,12 +76,14 @@ static inline ticks getticks()
 #define DO_TIMINGS
 
 #if !defined(PREFETCHW)
-#  if defined(__amd64__)
+#  if defined(__x86_64__) | defined(__i386__)
 #    define PREFETCHW(x) asm volatile("prefetchw %0" :: "m" (*(unsigned long *)x)) /* write */
 #  elif defined(__sparc__)
 #    define PREFETCHW(x) __builtin_prefetch((const void*) x, 1, 3)
 #  elif defined(__tile__)
 #    define PREFETCHW(x) tmc_mem_prefetch (x, 64)
+#  else
+#    warning "You need to define PREFETCHW(x) for your architecture"
 #  endif
 #endif
 
