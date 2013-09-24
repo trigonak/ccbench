@@ -1,8 +1,4 @@
-ccbench is a tool for measuring the cache-coherence latencies of a processor, i.e.,
-the latencies of loads, stores, compare-and-swap (CAS), fetch-and-increment (FAI),
-test-and-set (TAS), and swap (SWAP). The latencies that ccbench measures can be
-used to understand and predict the behavior of sharing and synchronization on
-the underlying hardware platform.
+ccbench is a tool for measuring the cache-coherence latencies of a processor, i.e., the latencies of loads, stores, compare-and-swap (CAS), fetch-and-increment (FAI), test-and-set (TAS), and swap (SWAP). The latencies that ccbench measures can be used to understand and predict the behavior of sharing and synchronization on the underlying hardware platform.
 
 * Website             : http://lpd.epfl.ch/site/ccbench
 * Author              : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
@@ -11,7 +7,6 @@ the underlying hardware platform.
 	  Everything You Always Wanted to Know about Synchronization but Were Afraid to Ask, 
 	  Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order), 
 	  SOSP '13 - Proceeding of the 24th ACM Symposium on Operating Systems Principles
-* License             : GNU General Public License Version 3
 
 
 Installation:
