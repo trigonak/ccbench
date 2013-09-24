@@ -53,9 +53,9 @@
 typedef ALIGNED(64) struct barrier
 {
   uint64_t num_participants;
-  uint64_t num_crossing1;
-  uint64_t num_crossing2;
-  uint64_t num_crossing3;
+  volatile uint64_t num_crossing1;
+  volatile uint64_t num_crossing2;
+  volatile uint64_t num_crossing3;
   int (*color)(int); /*or color function: if return 0 -> no , 1 -> participant. Priority on this */
 } barrier_t;
 
@@ -68,7 +68,6 @@ void barriers_term();
 #ifdef __sparc__
 #  define PAUSE    asm volatile("rd    %%ccr, %%g0\n\t" \
 				::: "memory")
-
 #elif defined(__tile__)
 #define PAUSE cycle_relax()
 #else
