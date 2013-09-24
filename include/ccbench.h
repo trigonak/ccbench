@@ -169,22 +169,6 @@ const char* moesi_type_des[] =
 #define DEFAULT_AO_SUCCESS  0
 
 
-#if defined(__amd64__)
-#define PREFETCHW(x) asm volatile("prefetchw %0" :: "m" (*(unsigned long *)x)) /* write */
-#define PREFETCH(x) asm volatile("prefetch %0" :: "m" (*(unsigned long *)x)) /* read */
-#define PREFETCHNTA(x) asm volatile("prefetchnta %0" :: "m" (*(unsigned long *)x)) /* non-temporal */
-#define PREFETCHT0(x) asm volatile("prefetcht0 %0" :: "m" (*(unsigned long *)x)) /* all levels */
-#define PREFETCHT1(x) asm volatile("prefetcht1 %0" :: "m" (*(unsigned long *)x)) /* all but L1 */
-#define PREFETCHT2(x) asm volatile("prefetcht2 %0" :: "m" (*(unsigned long *)x)) /* all but L1 & L2 */
-#elif defined(__sparc__)
-#define PREFETCH(x) __builtin_prefetch((const void*) x, 0, 3);
-#define PREFETCHNTA(x) 
-#define PREFETCHT0(x) 
-#define PREFETCHT1(x) 
-#define PREFETCHT2(x) 
-#endif	/* __amd64__ */
-
-
 #define CACHE_LINE_MEM_FILE "/cache_line"
 
 #define B0 _mm_mfence(); barrier_wait(0, ID, test_cores); _mm_mfence();
