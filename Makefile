@@ -1,7 +1,7 @@
 SRC = src
 INCLUDE = include
 
-CFLAGS = -O3
+CFLAGS = -O3 -Wall
 LDFLAGS = -lm -lrt
 VER_FLAGS = -D_GNU_SOURCE
 
