@@ -43,17 +43,11 @@ Limitations:
 Measuring latencies at this low level is not easy. Most of the events work as intended on all platforms.
 However, there are some subtle details that one should be aware of in order to "successfully" use
 ccbench:
-	* The memory fences to be used are related to the memory consistency model of the underlying
-	  platform. For instance, on an AMD Opteron Magny-Cours we can measure both loads and stores
-	  without using any fences (`ccbench -e0`). Contrarily, on an Intel Xeon Westmere-EX, we can
-	  measure the loads with a load fence, but a store needs a full fence (so, `ccbench -e8`).
-	* The stride parameter is used to try to fool the hardware prefetchers. This is also a
-	  hardware dependent parameter.
-	* There are certain cases where you might need to compile ccbench with -O0 flag instead of
-	  the default -O3 to be able to get the results. Know cases:
-	      * on the Tile-GX36, you probably need to compile with -O0 to get sensible number 
-	      	for the atomic ops
-	      * on UltraSPARC T2, you probably need to compile with -O0 for all operations 
+* The memory fences to be used are related to the memory consistency model of the underlying platform. For instance, on an AMD Opteron Magny-Cours we can measure both loads and stores without using any fences (`ccbench -e0`). Contrarily, on an Intel Xeon Westmere-EX, we can measure the loads with a load fence, but a store needs a full fence (so, `ccbench -e8`).
+* The stride parameter is used to try to fool the hardware prefetchers. This is also a hardware dependent parameter.
+* There are certain cases where you might need to compile ccbench with -O0 flag instead of the default -O3 to be able to get the results. Know cases:
+  * on the Tile-GX36, you probably need to compile with -O0 to get sensible number for the atomic ops
+  * on UltraSPARC T2, you probably need to compile with -O0 for all operations 
 	      	except the atomic ops
 
 
