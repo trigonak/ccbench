@@ -30,9 +30,9 @@ Details:
 --------
 ccbench brings a single cache line L in the desired MESI state and position in the processor and then 
 performs that target operation on L. In more details, ccbench takes the following steps:
-	 1. It uses one (or more) cores to bring L in the desired state and position, 
+	 1 It uses one (or more) cores to bring L in the desired state and position, 
 	    e.g., in a Modified state in the local caches of core 0 in node 0.
-	 2. It then uses another core in order to perform the target operation, e.g., load from a
+	 2 It then uses another core in order to perform the target operation, e.g., load from a
 	    modified state that is on the local caches of a core that is on the same node.
 
 
@@ -65,7 +65,8 @@ The comments prefixed with "#######" explain the results.
 
 ####### settings:
 
-`test:   LOAD_FROM_MODIFIED  / #cores: 2 / #repetitions: 1000 / stride: 4096 (256 kiB)  / fence:  load/full
+<pre>
+test:   LOAD_FROM_MODIFIED  / #cores: 2 / #repetitions: 1000 / stride: 4096 (256 kiB)  / fence:  load/full
 core1:   1 / core2:   2
 
 ####### warnings regarding the profiler correction. If the calculation fails for 10 times (i.e, the
@@ -121,4 +122,5 @@ core1:   1 / core2:   2
 ####### These values can be used for ensuring the correctness of some test (e.g., FAI)
 
 [00]  value of cl is 0          / sum is 0
-[01]  value of cl is 0          / sum is 0`
+[01]  value of cl is 0          / sum is 0
+</pre>
