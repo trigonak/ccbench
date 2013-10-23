@@ -47,7 +47,7 @@ ccbench:
 	* The stride parameter is used to try to fool the hardware prefetchers. This is also a
 	  hardware dependent parameter.
 	* There are certain cases where you might need to compile ccbench with -O0 flag instead of
-	  the default -O3 to be able to get the results. Know cases:
+	  the default -O3 to be able to get the results. Known cases:
 	      * on the Tile-GX36, you probably need to compile with -O0 to get sensible number 
 	      	for the atomic ops
 	      * on UltraSPARC T2, you probably need to compile with -O0 for all operations 
