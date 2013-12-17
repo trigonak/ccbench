@@ -138,12 +138,14 @@ extern volatile ticks pfd_correction;
 #  define PFDI(store)				\
   {						\
   asm volatile ("");				\
-  _pfd_s[store] = getticks();
+  _pfd_s[store] = getticks();			\
+  asm volatile ("");
 
 
 #  define PFDO(store, entry)						\
   asm volatile ("");							\
   pfd_store[store][entry] =  getticks() - _pfd_s[store] - pfd_correction; \
+  asm volatile ("");							\
   }
 
 #  define PFDPN(store, num_vals, num_print)				\
@@ -159,6 +161,18 @@ extern volatile ticks pfd_correction;
     get_abs_deviation(pfd_store[store], num_vals, &ad);			\
     print_abs_deviation(&ad);						\
   }
+
+#  define PFDISIMPLE()				\
+  volatile ticks __s = 0, __e = 0;		\
+  __s = getticks();
+
+#  define PFDOSIMPLE(store, entry)					\
+  __e = getticks();							\
+  __e -= (__s + pfd_correction);					\
+  printf("", __e);							\
+  pfd_store[store][entry] =  __e;
+
+
 #endif /* !DO_TIMINGS */
 
 # define PFDPREFTCH(store, entry)		\

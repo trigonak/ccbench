@@ -59,6 +59,10 @@
 extern cpu_set_t cpus;
 #endif	
 
+#if defined(__RTM__)
+#  include <immintrin.h>
+#endif
+
 #if defined(PLATFORM_NUMA)
 #  include <numa.h>
 #endif	/* PLATFORM_NUMA */
@@ -75,7 +79,22 @@ typedef struct cache_line
 #define CACHE_LINE_NUM      1024*1024 /* power of 2 pls */
 #define CACHE_LINE_STRIDE_2 2047
 
-# define LLU unsigned long long int
+
+#if defined(OPTERON)
+#  define SIZE_L1 (64*1024)
+#  define SIZE_L2 (512*1024)
+#elif defined(HASWELL)
+#  define SIZE_L1 (32*1024)
+#  define SIZE_L2 (256*1024)
+#else
+#  warning "Set the size of L1 / L2 in ccbench.h for L2 / L3 meascurements"
+#endif
+
+#define SIZE_L1_8B (SIZE_L1/8)
+#define SIZE_L2_8B (SIZE_L2/8)
+#define SIZE_L1_L2_8B (2*SIZE_L1_8B + SIZE_L2_8B)
+
+#define LLU unsigned long long int
 
 extern volatile cache_line_t* cache_line_open();
 extern void cache_line_close(const uint32_t id, const char* name);
@@ -109,10 +128,18 @@ typedef enum
     CAS_CONCURRENT,
     FAI_ON_INVALID,
     LOAD_FROM_L1,
+    LOAD_FROM_L2,
+    LOAD_FROM_L3,
     LFENCE,
     SFENCE,
     MFENCE,
     PROFILER,
+#if defined(__RTM__)
+    RTM_EMPTY_TX,
+    RTM_READ_ONE,
+    RTM_READ_EIGHT,
+    RTM_WRITE_ONE,
+#endif
     NUM_EVENTS			/* placeholder for printing the num of events */
   } moesi_type_t;
 
@@ -145,10 +172,18 @@ const char* moesi_type_des[] =
     "CAS_CONCURRENT",
     "FAI_ON_INVALID",
     "LOAD_FROM_L1",
+    "LOAD_FROM_L2",
+    "LOAD_FROM_L3",
     "LFENCE",
     "SFENCE",
     "MFENCE",
     "PROFILER",
+#if defined(__RTM__)
+    "RTM_EMPTY_TX",
+    "RTM_READ_ONE",
+    "RTM_READ_EIGHT",
+    "RTM_WRITE_ONE",
+#endif
   };
 
 
@@ -322,6 +357,7 @@ extern unsigned long* seeds;
     return *z;
   }
 #define clrand() (xorshf96(seeds, seeds + 1, seeds + 2) & (test_stride - 1))
+#define ssrand(range) ((xorshf96(seeds, seeds + 1, seeds + 2) % range))
 #define sirand(range) ((xorshf96(seeds, seeds + 1, seeds + 2) % range) + 64)
 
 static inline uint32_t pow2roundup (uint32_t x)

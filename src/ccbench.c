@@ -38,7 +38,7 @@ cpu_set_t cpus;
 
 uint32_t test_cores = DEFAULT_CORES;
 uint32_t test_reps = DEFAULT_REPS;
-moesi_type_t test_test = DEFAULT_TEST;;
+moesi_type_t test_test = DEFAULT_TEST;
 uint32_t test_core1 = DEFAULT_CORE1;
 uint32_t test_core2 = DEFAULT_CORE2;
 uint32_t test_core3 = DEFAULT_CORE3;
@@ -70,6 +70,49 @@ static uint32_t cas_no_pf(volatile cache_line_t* cache_line, volatile uint64_t r
 static uint32_t fai(volatile cache_line_t* cache_line, volatile uint64_t reps);
 static uint8_t tas(volatile cache_line_t* cl, volatile uint64_t reps);
 static uint32_t swap(volatile cache_line_t* cl, volatile uint64_t reps);
+
+void
+rtm_abort_reason_print(long reason)
+{
+  int one_at_least = 0;
+  if (reason & _XABORT_EXPLICIT)
+    {
+      printf("_XABORT_EXPLICIT ");
+      one_at_least = 1;
+    }
+  if (reason & _XABORT_RETRY)
+    {
+      printf("_XABORT_RETRY ");
+      one_at_least = 1;
+    }
+  if (reason & _XABORT_CONFLICT)
+    {
+      printf("_XABORT_CONFLICT ");
+      one_at_least = 1;
+    }
+  if (reason & _XABORT_CAPACITY)
+    {
+      printf("_XABORT_CAPACITY ");
+      one_at_least = 1;
+    }
+  if (reason & _XABORT_DEBUG)
+    {
+      printf(" _XABORT_DEBUG ");
+      one_at_least = 1;
+    }
+  if (reason & _XABORT_NESTED)
+    {
+      printf("_XABORT_NESTED ");
+      one_at_least = 1;
+    }
+
+  if (!one_at_least)
+    {
+      printf("_FOUND_NO_ABORT_REASON");
+    }
+
+  printf("\n");
+}
 
 int
 main(int argc, char **argv) 
@@ -990,7 +1033,7 @@ main(int argc, char **argv)
 	  }
 	case LOAD_FROM_L1:	/* 26 */
 	  {
-	    if (ID == 0)
+	    if (ID < 2)
 	      {
 		sum += load_0(cache_line, reps);
 		sum += load_0(cache_line, reps);
@@ -998,6 +1041,94 @@ main(int argc, char **argv)
 	      }
 	    break;
 	  }
+	case LOAD_FROM_L2:
+	  {
+	    if (ID < 2)
+	      {
+		volatile uint64_t mem_L1[SIZE_L1_8B + 18] = {0};
+		volatile uint64_t* target = mem_L1 + SIZE_L1_8B + 9;
+
+		size_t l;
+		for (l = 0; l < SIZE_L1_8B; l++)
+		  {
+		    mem_L1[l] = (l + 1) % SIZE_L1_8B;
+		  }
+
+		for (l = 0; l < 4*SIZE_L1_8B; l++)
+		  {
+		    size_t r1 = ssrand(SIZE_L1_8B);
+		    size_t r2 = ssrand(SIZE_L1_8B);
+
+		    if (r1 != mem_L1[r2] && r2 != mem_L1[r1])
+		      {
+			uint64_t tmp = mem_L1[r1];
+			mem_L1[r1] = mem_L1[r2];
+			mem_L1[r2] = tmp;
+		      }
+		  }
+
+		sum = *target; 
+		_mm_lfence();
+
+		volatile uint64_t chaise = mem_L1[0];
+		for (l = 0; l < SIZE_L1_8B; l++)
+		  {
+		    chaise = mem_L1[chaise];
+		  }
+
+		PFDPREFTCH(0, reps);
+	  
+		_mm_mfence();
+
+		PFDISIMPLE();
+		asm volatile("");
+		/* *target = chaise; */
+		PFDOSIMPLE(0, reps);
+		sum += *target;
+	      }
+	  }
+	  break;
+	case LOAD_FROM_L3:
+	  {
+	    if (ID < 2)
+	      {
+		volatile uint64_t mem_L2[SIZE_L1_L2_8B + 18] = {0};
+		volatile uint64_t* target = mem_L2 + SIZE_L1_L2_8B + 9;
+
+		volatile size_t l;
+		for (l = 0; l < SIZE_L1_L2_8B; l++)
+		  {
+		    mem_L2[l] = (l + 1) % SIZE_L1_L2_8B;
+		  }
+
+		for (l = 0; l < 4*SIZE_L1_L2_8B; l++)
+		  {
+		    size_t r1 = ssrand(SIZE_L1_L2_8B);
+		    size_t r2 = ssrand(SIZE_L1_L2_8B);
+
+		    if (r1 != mem_L2[r2] && r2 != mem_L2[r1])
+		      {
+			uint64_t tmp = mem_L2[r1];
+			mem_L2[r1] = mem_L2[r2];
+			mem_L2[r2] = tmp;
+		      }
+		  }
+
+		volatile uint64_t chaise = mem_L2[0];
+		for (l = 0; l < SIZE_L1_L2_8B; l++)
+		  {
+		    chaise = mem_L2[chaise];
+		  }
+
+		PFDPREFTCH(0, reps);
+
+		PFDISIMPLE();
+		*target = chaise;
+		PFDOSIMPLE(0, reps);
+		sum += *target;
+	      }
+	  }
+	  break;
 	case LFENCE:		/* 27 */
 	  if (ID < 2)
 	    {
@@ -1022,6 +1153,118 @@ main(int argc, char **argv)
 	      PFDO(0, reps);
 	    }
 	  break;
+#if defined(__RTM__)
+	case RTM_EMPTY_TX:
+	  {
+	    int commit = 0;
+	    PFDI(0);
+	    do
+	      {
+		long reason;
+		if ((reason = _xbegin()) == _XBEGIN_STARTED)
+		  {
+		    _xend();
+		    commit = 1;
+		  }
+		else 
+		  {
+		    sum++;
+		  }
+	      }
+	    while (!commit);
+	    _mm_lfence();
+	    PFDO(0, reps);
+	  }
+	  break;
+	case RTM_READ_ONE:
+	  {
+	    int retry = 128;
+	    size_t abort_num = 0;
+	    PFDI(0);
+	    do 
+	      {
+		long reason;
+		if ((reason = _xbegin()) == _XBEGIN_STARTED)
+		  {
+		    sum += cache_line[0].word[0];
+		    _xend();
+		    retry = 0;
+		  }
+		else 
+		  {
+		    rtm_abort_reason_print(reason);
+		    abort_num++;
+		    sum++;
+
+		  }
+	      }
+	    while (retry-- > 0);
+	    _mm_lfence();
+	    PFDO(0, reps);
+	  }
+	  break;
+	case RTM_READ_EIGHT:
+	  {
+	    int retry = 128;
+	    size_t abort_num = 0;
+	    PFDI(0);
+	    do 
+	      {
+		long reason;
+		if ((reason = _xbegin()) == _XBEGIN_STARTED)
+		  {
+		    sum += cache_line[0].word[0];
+		    sum += cache_line[31].word[0];
+		    sum += cache_line[17].word[0];
+		    sum += cache_line[313].word[0];
+		    sum += cache_line[177].word[0];
+		    sum += cache_line[13].word[0];
+		    sum += cache_line[1333].word[0];
+		    sum += cache_line[1311].word[0];
+		    _xend();
+		    retry = 0;
+		  }
+		else 
+		  {
+		    rtm_abort_reason_print(reason);
+		    abort_num++;
+		    sum++;
+
+		  }
+	      }
+	    while (retry-- > 0);
+	    _mm_lfence();
+	    PFDO(0, reps);
+	  }
+	  break;
+	case RTM_WRITE_ONE:
+	  {
+	    int retry = 128;
+	    size_t abort_num = 0;
+	    PFDI(0);
+	    do 
+	      {
+		long reason;
+		if ((reason = _xbegin()) == _XBEGIN_STARTED)
+		  {
+		    cache_line[0].word[0] = reps;
+		    _xend();
+		    retry = 0;
+		  }
+		else 
+		  {
+		    rtm_abort_reason_print(reason);
+		    abort_num++;
+		    sum++;
+		  }
+	      }
+	    while (retry-- > 0);
+	    _mm_lfence();
+	    PFDO(0, reps);
+	    /* printf("{%d/}", ID); fflush(stdout); */
+	  }
+	  break;
+#endif
 	case PROFILER:		/* 30 */
 	default:
 	  PFDI(0);
@@ -1029,7 +1272,6 @@ main(int argc, char **argv)
 	  PFDO(0, reps);
 	  break;
 	}
-
       B3;			/* BARRIER 3 */
     }
 

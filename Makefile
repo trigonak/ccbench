@@ -17,6 +17,14 @@ CC = gcc
 PLATFORM_NUMA = 1
 endif
 
+ifeq ($(UNAME), lpdpc34)
+PLATFORM = HASWELL
+CC = gcc-4.8
+PLATFORM_NUMA = 0
+CFLAGS +=  -mrtm
+VER_FLAGS += -D__RTM__
+endif
+
 ifeq ($(UNAME), diassrv8)
 PLATFORM = XEON
 CC = gcc
