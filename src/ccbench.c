@@ -1022,6 +1022,22 @@ main(int argc, char **argv)
 	      PFDO(0, reps);
 	    }
 	  break;
+	case PAUSE:		/* 31 */
+	  if (ID < 2)
+	    {
+	      PFDI(0);
+	      _mm_pause();
+	      PFDO(0, reps);
+	    }
+	  break;
+	case NOP:		/* 32 */
+	  if (ID < 2)
+	    {
+	      PFDI(0);
+	      asm volatile ("nop");
+	      PFDO(0, reps);
+	    }
+	  break;
 	case PROFILER:		/* 30 */
 	default:
 	  PFDI(0);

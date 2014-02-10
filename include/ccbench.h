@@ -113,7 +113,9 @@ typedef enum
     SFENCE,
     MFENCE,
     PROFILER,
-    NUM_EVENTS			/* placeholder for printing the num of events */
+    PAUSE,
+    NOP,
+    NUM_EVENTS,			/* placeholder for printing the num of events */
   } moesi_type_t;
 
 const char* moesi_type_des[] =
@@ -149,6 +151,8 @@ const char* moesi_type_des[] =
     "SFENCE",
     "MFENCE",
     "PROFILER",
+    "PAUSE",
+    "NOP",
   };
 
 
