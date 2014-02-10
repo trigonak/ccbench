@@ -155,7 +155,7 @@ barrier_wait(const uint32_t barrier_num, const uint32_t id, const uint32_t total
 
   while (b->num_crossing1 < b->num_participants)
     {
-      PAUSE;
+      PAUSE();
       _mm_mfence();
     }
 
@@ -166,7 +166,7 @@ barrier_wait(const uint32_t barrier_num, const uint32_t id, const uint32_t total
 
   while (b->num_crossing2 < b->num_participants)
     {
-      PAUSE;
+      PAUSE();
       _mm_mfence();
     }
 
@@ -176,7 +176,7 @@ barrier_wait(const uint32_t barrier_num, const uint32_t id, const uint32_t total
 
   while (b->num_crossing3 < b->num_participants)
     {
-      PAUSE;
+      PAUSE();
       _mm_mfence();
     }
 

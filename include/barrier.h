@@ -66,12 +66,12 @@ void barrier_wait(const uint32_t barrier_num, const uint32_t id, const uint32_t 
 void barriers_term();
 
 #ifdef __sparc__
-#  define PAUSE    asm volatile("rd    %%ccr, %%g0\n\t" \
+#  define PAUSE()    asm volatile("rd    %%ccr, %%g0\n\t"	\
 				::: "memory")
 #elif defined(__tile__)
-#define PAUSE cycle_relax()
+#define PAUSE() cycle_relax()
 #else
-#define PAUSE _mm_pause()
+#define PAUSE() _mm_pause()
 #endif
 
 #endif	/* BARRIER_H */
