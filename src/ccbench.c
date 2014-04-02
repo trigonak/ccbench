@@ -957,7 +957,6 @@ main(int argc, char **argv)
 	      case 0:
 	      case 1:
 		sum += cas(cache_line, reps);
-		sum += cas(cache_line, reps);
 		break;
 	      default:
 		sum += cas_no_pf(cache_line, reps);
