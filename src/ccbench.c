@@ -136,7 +136,7 @@ main(int argc, char **argv)
 		 "of loads, stores, CAS, FAI, TAS, and SWAP\n"
 		 "\n"
 		 "Usage:\n"
-		 "  ./moesi [options...]\n"
+		 "  ./ccbench [options...]\n"
 		 "\n"
 		 "Options:\n"
 		 "  -h, --help\n"
@@ -333,7 +333,7 @@ main(int argc, char **argv)
 
  fork_done:
   ID = rank;
-  uint8_t core = 0;
+  size_t core = 0;
   switch (ID)
     {
     case 0:
