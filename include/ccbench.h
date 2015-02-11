@@ -109,6 +109,7 @@ typedef enum
     CAS_CONCURRENT,
     FAI_ON_INVALID,
     LOAD_FROM_L1,
+    LOAD_FROM_MEM_SIZE,
     LFENCE,
     SFENCE,
     MFENCE,
@@ -147,6 +148,7 @@ const char* moesi_type_des[] =
     "CAS_CONCURRENT",
     "FAI_ON_INVALID",
     "LOAD_FROM_L1",
+    "LOAD_FROM_MEM_SIZE",
     "LFENCE",
     "SFENCE",
     "MFENCE",
@@ -310,23 +312,24 @@ static inline ticks getticks_correction_calc()
 
 extern unsigned long* seeds;
   //Marsaglia's xorshf generator //period 2^96-1
-  static inline unsigned long
-  xorshf96(unsigned long* x, unsigned long* y, unsigned long* z) 
-  {          
-    unsigned long t;
-    (*x) ^= (*x) << 16;
-    (*x) ^= (*x) >> 5;
-    (*x) ^= (*x) << 1;
+static inline unsigned long
+xorshf96(unsigned long* x, unsigned long* y, unsigned long* z) 
+{          
+  unsigned long t;
+  (*x) ^= (*x) << 16;
+  (*x) ^= (*x) >> 5;
+  (*x) ^= (*x) << 1;
 
-    t = *x;
-    (*x) = *y;
-    (*y) = *z;
-    (*z) = t ^ (*x) ^ (*y);
+  t = *x;
+  (*x) = *y;
+  (*y) = *z;
+  (*z) = t ^ (*x) ^ (*y);
 
-    return *z;
-  }
+  return *z;
+}
 #define clrand() (xorshf96(seeds, seeds + 1, seeds + 2) & (test_stride - 1))
 #define sirand(range) ((xorshf96(seeds, seeds + 1, seeds + 2) % range) + 64)
+#define my_random(a, b, c) xorshf96(a, b, c)
 
 static inline uint32_t pow2roundup (uint32_t x)
 {

@@ -59,6 +59,10 @@ barriers_init(const uint32_t num_procs)
 {
   uint32_t size;
   size = NUM_BARRIERS * sizeof(barrier_t);
+  if (size < 8192)
+    {
+      size = 8192;
+    }
 
   char keyF[100];
   sprintf(keyF, BARRIER_MEM_FILE);

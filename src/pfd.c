@@ -109,7 +109,7 @@ pfd_store_init(uint32_t num_entries)
   pfd_correction = ad.avg;
   assert(pfd_correction > 0);
   
-  printf(" -- pfd correction: %llu (std deviation: %.1f%%)\n", (long long unsigned int) pfd_correction, std_pp);
+  printf("* set pfd correction: %llu (std deviation: %.1f%%)\n", (long long unsigned int) pfd_correction, std_pp);
 }
 
 static inline 

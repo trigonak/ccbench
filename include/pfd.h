@@ -146,6 +146,13 @@ extern volatile ticks pfd_correction;
   pfd_store[store][entry] =  getticks() - _pfd_s[store] - pfd_correction; \
   }
 
+#  define PFDOR(store, entry, reps)					\
+  asm volatile ("");							\
+  volatile ticks __t = getticks();					\
+  pfd_store[store][entry] = (__t - _pfd_s[store] - pfd_correction) /	\
+    reps;								\
+  }
+
 #  define PFDPN(store, num_vals, num_print)				\
   {									\
     uint32_t _i;							\

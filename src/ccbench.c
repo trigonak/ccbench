@@ -36,9 +36,9 @@ unsigned long* seeds;
 cpu_set_t cpus;
 #endif
 
+moesi_type_t test_test = DEFAULT_TEST;
 uint32_t test_cores = DEFAULT_CORES;
 uint32_t test_reps = DEFAULT_REPS;
-moesi_type_t test_test = DEFAULT_TEST;;
 uint32_t test_core1 = DEFAULT_CORE1;
 uint32_t test_core2 = DEFAULT_CORE2;
 uint32_t test_core3 = DEFAULT_CORE3;
@@ -49,6 +49,7 @@ uint32_t test_print = DEFAULT_PRINT;
 uint32_t test_stride = DEFAULT_STRIDE;
 uint32_t test_fence = DEFAULT_FENCE;
 uint32_t test_ao_success = DEFAULT_AO_SUCCESS;
+size_t   test_mem_size = CACHE_LINE_NUM * sizeof(cache_line_t);
 uint32_t test_cache_line_num = CACHE_LINE_NUM;
 uint32_t test_lfence = DEFAULT_LFENCE;
 uint32_t test_sfence = DEFAULT_SFENCE;
@@ -60,6 +61,7 @@ static void store_0_eventually(volatile cache_line_t* cl, volatile uint64_t reps
 static void store_0_eventually_pfd1(volatile cache_line_t* cl, volatile uint64_t reps);
 
 static uint64_t load_0(volatile cache_line_t* cache_line, volatile uint64_t reps);
+static uint64_t load_next(volatile uint64_t* cl, volatile uint64_t reps);
 static uint64_t load_0_eventually(volatile cache_line_t* cl, volatile uint64_t reps);
 static uint64_t load_0_eventually_no_pf(volatile cache_line_t* cl);
 
@@ -70,6 +72,10 @@ static uint32_t cas_no_pf(volatile cache_line_t* cache_line, volatile uint64_t r
 static uint32_t fai(volatile cache_line_t* cache_line, volatile uint64_t reps);
 static uint8_t tas(volatile cache_line_t* cl, volatile uint64_t reps);
 static uint32_t swap(volatile cache_line_t* cl, volatile uint64_t reps);
+
+static size_t parse_size(char* optarg);
+static void create_rand_list_cl(volatile uint64_t* list, size_t n);
+
 
 int
 main(int argc, char **argv) 
@@ -214,7 +220,8 @@ main(int argc, char **argv)
 	  test_fence = atoi(optarg);
 	  break;
 	case 'm':
-	  test_cache_line_num = atoi(optarg);
+	  test_mem_size = parse_size(optarg);
+	  printf("Data size : %zu KiB\n", test_mem_size / 1024);
 	  break;
 	case 'u':
 	  test_ao_success = 1;
@@ -235,11 +242,19 @@ main(int argc, char **argv)
     }
 
 
+  test_cache_line_num = test_mem_size / sizeof(cache_line_t);
+
   if ((test_test == STORE_ON_EXCLUSIVE || test_test == STORE_ON_INVALID || test_test == LOAD_FROM_INVALID
        || test_test == LOAD_FROM_EXCLUSIVE || test_test == LOAD_FROM_SHARED) && !test_flush)
     {
       assert((test_reps * test_stride) <= test_cache_line_num);
     }
+
+  if (test_test != LOAD_FROM_MEM_SIZE)
+    {
+      assert(test_stride < test_cache_line_num);
+    }
+
 
   ID = 0;
   printf("test: %20s  / #cores: %d / #repetitions: %d / stride: %d (%u kiB)", moesi_type_des[test_test], 
@@ -365,6 +380,8 @@ main(int argc, char **argv)
 #if defined(__tile__)
   tmc_cmem_init(0);		/*   initialize shared memory */
 #endif  /* TILERA */
+
+  volatile uint64_t* cl = (volatile uint64_t*) cache_line;
 
   B0;
   if (ID < 3)
@@ -997,7 +1014,15 @@ main(int argc, char **argv)
 	      }
 	    break;
 	  }
-	case LFENCE:		/* 27 */
+	case LOAD_FROM_MEM_SIZE: /* 27 */
+	  {
+	    if (ID < 3)
+	      {
+		sum += load_next(cl, reps);
+	      }
+	  }
+	  break;
+	case LFENCE:		/* 28 */
 	  if (ID < 2)
 	    {
 	      PFDI(0);
@@ -1005,7 +1030,7 @@ main(int argc, char **argv)
 	      PFDO(0, reps);
 	    }
 	  break;
-	case SFENCE:		/* 28 */
+	case SFENCE:		/* 29 */
 	  if (ID < 2)
 	    {
 	      PFDI(0);
@@ -1013,7 +1038,7 @@ main(int argc, char **argv)
 	      PFDO(0, reps);
 	    }
 	  break;
-	case MFENCE:		/* 29 */
+	case MFENCE:		/* 30 */
 	  if (ID < 2)
 	    {
 	      PFDI(0);
@@ -1081,6 +1106,13 @@ main(int argc, char **argv)
 	      break;
 	    case LOAD_FROM_L1:
 	      if (ID < 1)
+		{
+		  PRINT(" *** Core %2d **********************************************************************************", ID);
+		  PFDPN(0, test_reps, test_print);
+		}
+	      break;
+	    case LOAD_FROM_MEM_SIZE:
+	      if (ID < 3)
 		{
 		  PRINT(" *** Core %2d **********************************************************************************", ID);
 		  PFDPN(0, test_reps, test_print);
@@ -1368,6 +1400,11 @@ main(int argc, char **argv)
 	case LOAD_FROM_L1:
 	  {
 	    PRINT(" ** Results from Core 0: load from L1");
+	    break;
+	  }
+	case LOAD_FROM_MEM_SIZE:
+	  {
+	    PRINT(" ** Results from Corees 0 & 1 & 2: load from random %zu KiB", test_mem_size / 1024);
 	    break;
 	  }
 	case LFENCE:
@@ -1838,6 +1875,7 @@ load_0_nf(volatile cache_line_t* cl, volatile uint64_t reps)
   return val;
 }
 
+
 uint64_t
 load_0(volatile cache_line_t* cl, volatile uint64_t reps)
 {
@@ -1858,6 +1896,62 @@ load_0(volatile cache_line_t* cl, volatile uint64_t reps)
   return val;
 }
 
+static uint64_t
+load_next_lf(volatile uint64_t* cl, volatile uint64_t reps)
+{
+  PFDI(0);
+  cl = (uint64_t*) *cl;
+  _mm_lfence();
+  PFDO(0, reps);
+  return *cl;
+
+}
+
+static uint64_t
+load_next_mf(volatile uint64_t* cl, volatile uint64_t reps)
+{
+  PFDI(0);
+  cl = (uint64_t*) *cl;
+  _mm_mfence();
+  PFDO(0, reps);
+  return *cl;
+
+}
+
+static uint64_t
+load_next_nf(volatile uint64_t* cl, volatile uint64_t reps)
+{
+  const size_t do_reps = test_cache_line_num;
+  PFDI(0);
+  int i;
+  for (i = 0; i < do_reps; i++)
+    {
+      cl = (uint64_t*) *cl;
+    }
+  PFDOR(0, reps, do_reps);
+  
+  return *cl;
+}
+
+uint64_t
+load_next(volatile uint64_t* cl, volatile uint64_t reps)
+{
+  uint64_t val = 0;
+  if (test_lfence == 0)
+    {
+      val = load_next_nf(cl, reps);
+    }
+  else if (test_lfence == 1)
+    {
+      val = load_next_lf(cl, reps);
+    }
+  else if (test_lfence == 2)
+    {
+      val = load_next_mf(cl, reps);
+    }
+  return val;
+}
+
 void
 invalidate(volatile cache_line_t* cl, uint64_t index, volatile uint64_t reps)
 {
@@ -1865,6 +1959,36 @@ invalidate(volatile cache_line_t* cl, uint64_t index, volatile uint64_t reps)
   _mm_clflush((void*) (cl + index));
   PFDO(0, reps);
   _mm_mfence();
+}
+
+static size_t
+parse_size(char* optarg)
+{
+  size_t test_mem_size_multi = 1;
+  char multi = optarg[strlen(optarg) - 1];
+  if (multi == 'b' || multi == 'B')
+    {
+      optarg[strlen(optarg) - 1] = optarg[strlen(optarg)];
+      multi = optarg[strlen(optarg) - 1];
+    }
+
+  if (multi == 'k' || multi == 'K')
+    {
+      test_mem_size_multi = 1024;
+      optarg[strlen(optarg) - 1] = optarg[strlen(optarg)];
+    }
+  else if (multi == 'm' || multi == 'M')
+    {
+      test_mem_size_multi = 1024 * 1024LL;
+      optarg[strlen(optarg) - 1] = optarg[strlen(optarg)];
+    }
+  else if (multi == 'g' || multi == 'G')
+    {
+      test_mem_size_multi = 1024 * 1024 * 1024LL;
+      optarg[strlen(optarg) - 1] = optarg[strlen(optarg)];
+    }
+
+  return test_mem_size_multi * atoi(optarg);
 }
 
 volatile cache_line_t* 
@@ -1934,17 +2058,60 @@ cache_line_open()
   if (ID == 0)
     {
       uint32_t cl;
-      for (cl = 0; cl < CACHE_LINE_NUM; cl++)
+      for (cl = 0; cl < test_cache_line_num; cl++)
 	{
 	  cache_line[cl].word[0] = 0;
 	  _mm_clflush((void*) (cache_line + cl));
 	}
+
+      if (test_test == LOAD_FROM_MEM_SIZE)
+	{
+	  create_rand_list_cl((volatile uint64_t*) cache_line, test_mem_size / sizeof(uint64_t));
+	}
+
 
     }
 
   _mm_mfence();
   return cache_line;
 }
+
+static void
+create_rand_list_cl(volatile uint64_t* list, size_t n)
+{
+  size_t per_cl = sizeof(cache_line_t) / sizeof(uint64_t);
+  n /= per_cl;
+
+  unsigned long* s = seed_rand();
+  s[0] = 0xB9E4E2F1F1E2E3D5L;
+  s[1] = 0xF1E2E3D5B9E4E2F1L;
+  s[2] = 0x9B3A0FA212342345L;
+
+  uint8_t* used = calloc(n * per_cl, sizeof(uint8_t));
+  assert (used != NULL);
+
+  size_t idx = 0;
+  size_t used_num = 0;
+  while (used_num < n - 1)
+    {
+      used[idx] = 1;
+      used_num++;
+      
+      size_t nxt;
+      do 
+	{
+	  nxt = (my_random(s, s+1, s+2) % n) * per_cl;
+	}
+      while (used[nxt]);
+
+      list[idx] = (uint64_t) (list + nxt);
+      idx = nxt;
+    }
+  list[idx] = (uint64_t) (list); /* close the loop! */
+
+  free(s);
+  free(used);
+} 
 
 void
 cache_line_close(const uint32_t id, const char* name)
