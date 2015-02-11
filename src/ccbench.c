@@ -1899,10 +1899,15 @@ load_0(volatile cache_line_t* cl, volatile uint64_t reps)
 static uint64_t
 load_next_lf(volatile uint64_t* cl, volatile uint64_t reps)
 {
+  const size_t do_reps = test_cache_line_num;
   PFDI(0);
-  cl = (uint64_t*) *cl;
-  _mm_lfence();
-  PFDO(0, reps);
+  int i;
+  for (i = 0; i < do_reps; i++)
+    {
+      cl = (uint64_t*) *cl;
+      _mm_lfence();
+    }
+  PFDOR(0, reps, do_reps);
   return *cl;
 
 }
@@ -1910,10 +1915,15 @@ load_next_lf(volatile uint64_t* cl, volatile uint64_t reps)
 static uint64_t
 load_next_mf(volatile uint64_t* cl, volatile uint64_t reps)
 {
+  const size_t do_reps = test_cache_line_num;
   PFDI(0);
-  cl = (uint64_t*) *cl;
-  _mm_mfence();
-  PFDO(0, reps);
+  int i;
+  for (i = 0; i < do_reps; i++)
+    {
+      cl = (uint64_t*) *cl;
+      _mm_mfence();
+    }
+  PFDOR(0, reps, do_reps);
   return *cl;
 
 }
@@ -1929,7 +1939,6 @@ load_next_nf(volatile uint64_t* cl, volatile uint64_t reps)
       cl = (uint64_t*) *cl;
     }
   PFDOR(0, reps, do_reps);
-  
   return *cl;
 }
 
