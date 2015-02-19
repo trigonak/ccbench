@@ -138,27 +138,27 @@ print_abs_deviation(const abs_deviation_t* abs_dev)
   double v10p = 100 * 
     (1 - (abs_dev->num_vals - abs_dev->num_dev_10p) / (double) abs_dev->num_vals);
   double std_10pp = 100 * (1 - (abs_dev->avg_10p - abs_dev->std_dev_10p) / abs_dev->avg_10p);
-  PRINT("  0-10%% : %-10u (%5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%%)", 
+  PRINT("  0-10%% : %-10u ( %5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%% )", 
 	abs_dev->num_dev_10p, v10p, abs_dev->avg_10p, abs_dev->abs_dev_10p, abs_dev->std_dev_10p, std_10pp);
   double v25p = 100 
     * (1 - (abs_dev->num_vals - abs_dev->num_dev_25p) / (double) abs_dev->num_vals);
   double std_25pp = 100 * (1 - (abs_dev->avg_25p - abs_dev->std_dev_25p) / abs_dev->avg_25p);
-  PRINT(" 10-25%% : %-10u (%5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%%)", 
+  PRINT(" 10-25%% : %-10u ( %5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%% )", 
 	abs_dev->num_dev_25p, v25p, abs_dev->avg_25p, abs_dev->abs_dev_25p, abs_dev->std_dev_25p, std_25pp);
   double v50p = 100 * 
     (1 - (abs_dev->num_vals - abs_dev->num_dev_50p) / (double) abs_dev->num_vals);
   double std_50pp = 100 * (1 - (abs_dev->avg_50p - abs_dev->std_dev_50p) / abs_dev->avg_50p);
-  PRINT(" 25-50%% : %-10u (%5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%%)", 
+  PRINT(" 25-50%% : %-10u ( %5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%% )", 
 	abs_dev->num_dev_50p, v50p, abs_dev->avg_50p, abs_dev->abs_dev_50p, abs_dev->std_dev_50p, std_50pp);
   double v75p = 100 * 
     (1 - (abs_dev->num_vals - abs_dev->num_dev_75p) / (double) abs_dev->num_vals);
   double std_75pp = 100 * (1 - (abs_dev->avg_75p - abs_dev->std_dev_75p) / abs_dev->avg_75p);
-  PRINT(" 50-75%% : %-10u (%5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%%)", 
+  PRINT(" 50-75%% : %-10u ( %5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%% )", 
 	abs_dev->num_dev_75p, v75p, abs_dev->avg_75p, abs_dev->abs_dev_75p, abs_dev->std_dev_75p, std_75pp);
   double vrest = 100 * 
     (1 - (abs_dev->num_vals - abs_dev->num_dev_rst) / (double) abs_dev->num_vals);
   double std_rspp = 100 * (1 - (abs_dev->avg_rst - abs_dev->std_dev_rst) / abs_dev->avg_rst);
-  PRINT("75-100%% : %-10u (%5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%%)\n", 
+  PRINT("75-100%% : %-10u ( %5.1f%%  |  avg:  %6.1f  |  abs dev: %6.1f  |  std dev: %6.1f = %5.1f%% )\n", 
 	abs_dev->num_dev_rst, vrest, abs_dev->avg_rst, abs_dev->abs_dev_rst, abs_dev->std_dev_rst, std_rspp);
 }
 
