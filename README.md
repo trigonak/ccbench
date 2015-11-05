@@ -58,13 +58,14 @@ The comments prefixed with "#>>" explain the results.
 
 <pre>
 #>> settings:
-test: LOAD_FROM_MODIFIED / #cores: 2 / #reps: 1000 / stride: 4096 (256 kiB) / fence: load/full
+test: LOAD_FROM_MODIFIED / #cores: 2 / #reps: 1000 / stride: 4096 / fence: load/full
 core1:   1 / core2:   2
 
-#>> warnings regarding the profiler correction. If the calculation fails for 10 times (i.e, the
-#>> correction calculation does not have a low std deviation, the correction is set manually
-#>> to a give (in src/pfd.c) platform-specific value. If the default value is not set, the
-#>> avg corrections are still used (this works ok in my experience)
+#>> warnings regarding the profiler correction. If the calculation fails for 10 times 
+#>> (i.e, the correction calculation does not have a low std deviation, the correction 
+#>> is manually set to a given (in src/pfd.c) platform-specific value. If the default 
+#>> value is not set, the avg corrections are still used. 
+#>> (This approach works OK in my experience.)
 
 * warning: avg pfd correction is 20.2 with std deviation: 16.3%. Recalculating.
 * warning: setting pfd correction manually
@@ -75,7 +76,7 @@ core1:   1 / core2:   2
 
 #>> results
 
-[00]  *** Core  0 ***********************************************************************
+[00]  *** Core  0 ***************************************************************
 
  ---- statistics:
 
@@ -84,33 +85,34 @@ core1:   1 / core2:   2
 [00]  avg : 111.5      abs dev : 2.5        std dev : 4.5        num     : 1000
 [00]  min : 32.0       (element:    779)    max     : 136.0      (element:    415)
 
-#>> clustering of values around the global avg. This used as an easy way to remove the outliers
-#>> columns: % around the avg / num of sample / % of the total num of sample / avg of the cluster /
+#>> clustering of values around the global avg. This approach is used as an easy way 
+#>> of remove outlier measurements. The columns represent:
+#>> % group / num of samples / % of the total num of samples / avg of the cluster /
 #>> absolute deviation of the cluster / standard deviation of the cluster
 
-[00]   0-10% : 987 ( 98.7%  |  avg: 111.5  |  abs dev:  2.3  |  std dev:  3.0 =   2.7%)
-[00]  10-25% : 11  (  1.1%  |  avg: 126.2  |  abs dev:  3.5  |  std dev:  4.2 =   3.3%)
-[00]  25-50% : 1   (  0.1%  |  avg:  65.0  |  abs dev:  0.0  |  std dev:  0.0 =   0.0%)
-[00]  50-75% : 1   (  0.1%  |  avg:  32.0  |  abs dev:  0.0  |  std dev:  0.0 =   0.0%)
-[00] 75-100% : 0   (  0.0%  |  avg:  -nan  |  abs dev: -nan  |  std dev: -nan =  -nan%)
+[00]   0-10% : 987 ( 98.7% | avg: 111.5 | abs dev:  2.3 | std dev:  3.0 =   2.7%)
+[00]  10-25% : 11  (  1.1% | avg: 126.2 | abs dev:  3.5 | std dev:  4.2 =   3.3%)
+[00]  25-50% : 1   (  0.1% | avg:  65.0 | abs dev:  0.0 | std dev:  0.0 =   0.0%)
+[00]  50-75% : 1   (  0.1% | avg:  32.0 | abs dev:  0.0 | std dev:  0.0 =   0.0%)
+[00] 75-100% : 0   (  0.0% | avg:  -nan | abs dev: -nan | std dev: -nan =  -nan%)
 
-[01]  *** Core  1 ***********************************************************************
+[01]  *** Core  1 ***************************************************************
 
  ---- statistics:
 [01]     avg : 112.3 abs dev : 2.5        std dev : 5.4        num     : 1000
 [01]     min : 10.0  (element:    902)    max     : 133.0      (element:    404)
-[01]   0-10% : 989 ( 98.9%  |  avg: 112.4  |  abs dev:  2.2  |  std dev:  2.9 =   2.6%)
-[01]  10-25% : 9   (  0.9%  |  avg: 126.0  |  abs dev:  1.8  |  std dev:  2.7 =   2.1%)
-[01]  25-50% : 0   (  0.0%  |  avg:  -nan  |  abs dev: -nan  |  std dev: -nan =  -nan%)
-[01]  50-75% : 0   (  0.0%  |  avg:  -nan  |  abs dev: -nan  |  std dev: -nan =  -nan%)
-[01] 75-100% : 2   (  0.2%  |  avg:  13.5  |  abs dev:  3.5  |  std dev:  3.5 =  25.9%)
+[01]   0-10% : 989 ( 98.9% | avg: 112.4 | abs dev:  2.2 | std dev:  2.9 =   2.6%)
+[01]  10-25% : 9   (  0.9% | avg: 126.0 | abs dev:  1.8 | std dev:  2.7 =   2.1%)
+[01]  25-50% : 0   (  0.0% | avg:  -nan | abs dev: -nan | std dev: -nan =  -nan%)
+[01]  50-75% : 0   (  0.0% | avg:  -nan | abs dev: -nan | std dev: -nan =  -nan%)
+[01] 75-100% : 2   (  0.2% | avg:  13.5 | abs dev:  3.5 | std dev:  3.5 =  25.9%)
 
 #>> The meaning of the results
 
-[00]  ** Results from Core 0 : store to owned mine (if owned state supported, else exclusive)
-[00]  ** Results from Core 1 : load from modified (makes it owned, if owned state supported)
+[00] Results Core 0 : store to owned mine (if owned state supported, else exclusive)
+[00] Results Core 1 : load from modified (makes it owned, if owned state supported)
 
-#>> The final value in the cache line that was used / the sum of all loads on this core
+#>> The final val in the cache line that was used / the sum of all loads on this core
 #>> These values can be used for ensuring the correctness of some test (e.g., FAI)
 
 [00]  value of cl is 0    / sum is 0
