@@ -75,35 +75,35 @@ core1:   1 / core2:   2
 
 ####### results
 
-[00]  *** Core  0 **********************************************************************************
+[00]  *** Core  0 ***********************************************************************
 
  ---- statistics:
 
 ####### global avg and deviations
 
-[00]     avg : 111.5      abs dev : 2.5        std dev : 4.5        num     : 1000
-[00]     min : 32.0       (element:    779)    max     : 136.0      (element:    415)
+[00]  avg : 111.5      abs dev : 2.5        std dev : 4.5        num     : 1000
+[00]  min : 32.0       (element:    779)    max     : 136.0      (element:    415)
 
 ####### clustering of values around the global avg. This used as an easy way to remove the outliers
 ####### columns: % around the avg / num of sample / % of the total num of sample / avg of the cluster /
 ####### absolute deviation of the cluster / standard deviation of the cluster
 
-[00]   0-10% : 987        ( 98.7%  |  avg:   111.5  |  abs dev:    2.3  |  std dev:    3.0 =   2.7%)
-[00]  10-25% : 11         (  1.1%  |  avg:   126.2  |  abs dev:    3.5  |  std dev:    4.2 =   3.3%)
-[00]  25-50% : 1          (  0.1%  |  avg:    65.0  |  abs dev:    0.0  |  std dev:    0.0 =   0.0%)
-[00]  50-75% : 1          (  0.1%  |  avg:    32.0  |  abs dev:    0.0  |  std dev:    0.0 =   0.0%)
-[00] 75-100% : 0          (  0.0%  |  avg:    -nan  |  abs dev:   -nan  |  std dev:   -nan =  -nan%)
+[00]   0-10% : 987   ( 98.7%  |  avg: 111.5  |  abs dev:  2.3  |  std dev:  3.0 =   2.7%)
+[00]  10-25% : 11    (  1.1%  |  avg: 126.2  |  abs dev:  3.5  |  std dev:  4.2 =   3.3%)
+[00]  25-50% : 1     (  0.1%  |  avg:  65.0  |  abs dev:  0.0  |  std dev:  0.0 =   0.0%)
+[00]  50-75% : 1     (  0.1%  |  avg:  32.0  |  abs dev:  0.0  |  std dev:  0.0 =   0.0%)
+[00] 75-100% : 0     (  0.0%  |  avg:  -nan  |  abs dev: -nan  |  std dev: -nan =  -nan%)
 
-[01]  *** Core  1 **********************************************************************************
+[01]  *** Core  1 ***********************************************************************
 
  ---- statistics:
-[01]     avg : 112.3      abs dev : 2.5        std dev : 5.4        num     : 1000
-[01]     min : 10.0       (element:    902)    max     : 133.0      (element:    404)
-[01]   0-10% : 989        ( 98.9%  |  avg:   112.4  |  abs dev:    2.2  |  std dev:    2.9 =   2.6%)
-[01]  10-25% : 9          (  0.9%  |  avg:   126.0  |  abs dev:    1.8  |  std dev:    2.7 =   2.1%)
-[01]  25-50% : 0          (  0.0%  |  avg:    -nan  |  abs dev:   -nan  |  std dev:   -nan =  -nan%)
-[01]  50-75% : 0          (  0.0%  |  avg:    -nan  |  abs dev:   -nan  |  std dev:   -nan =  -nan%)
-[01] 75-100% : 2          (  0.2%  |  avg:    13.5  |  abs dev:    3.5  |  std dev:    3.5 =  25.9%)
+[01]     avg : 112.3 abs dev : 2.5        std dev : 5.4        num     : 1000
+[01]     min : 10.0  (element:    902)    max     : 133.0      (element:    404)
+[01]   0-10% : 989   ( 98.9%  |  avg: 112.4  |  abs dev:  2.2  |  std dev:  2.9 =   2.6%)
+[01]  10-25% : 9     (  0.9%  |  avg: 126.0  |  abs dev:  1.8  |  std dev:  2.7 =   2.1%)
+[01]  25-50% : 0     (  0.0%  |  avg:  -nan  |  abs dev: -nan  |  std dev: -nan =  -nan%)
+[01]  50-75% : 0     (  0.0%  |  avg:  -nan  |  abs dev: -nan  |  std dev: -nan =  -nan%)
+[01] 75-100% : 2     (  0.2%  |  avg:  13.5  |  abs dev:  3.5  |  std dev:  3.5 =  25.9%)
 
 ####### The meaning of the results
 
@@ -113,6 +113,6 @@ core1:   1 / core2:   2
 ####### The final value in the cache line that was used / the sum of all loads on this core
 ####### These values can be used for ensuring the correctness of some test (e.g., FAI)
 
-[00]  value of cl is 0          / sum is 0
-[01]  value of cl is 0          / sum is 0
+[00]  value of cl is 0    / sum is 0
+[01]  value of cl is 0    / sum is 0
 </pre>
